@@ -33,7 +33,9 @@ model Post{
   comment Comment[]
   comment_count Int @default(0)
 }
-//onDelete: Cascade to the user field on the Post model means that deleting the User record will also delete all related Post records
+//onDelete: Cascade to the user field on the comment model means that deleting the User record will also delete all related Comment records
+
+//similarly :Casecade to the post field on the comment model means that deleting the post record will also delete all related comment records
 model Comment{
   id String @id @default(uuid())
   post Post @relation(fields: [post_id], references: [id] ,onDelete: Cascade)

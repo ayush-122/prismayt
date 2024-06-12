@@ -68,10 +68,12 @@ export const updateComment = async (req,res)=>{
     await prisma.user.update({
 
         where:{
-            id:Number(commentId)
+            id:commentId
         },
         data:{
           user_id: Number(user_id),
+          post_id:Number(post_id),
+          comment
           
     }});
 
@@ -81,9 +83,19 @@ export const updateComment = async (req,res)=>{
 export const deleteComment =async(req,res)=>{
 
     const commentId =req.params.id;
+
+    //i know the comment Id now I need to find the post_id
+
+  const {post_id}=  await prisma.comment.findUnique({
+        where:{
+            id:commentId
+        }
+    });
+    
+   
     await prisma.post.update({
         where:{
-            id:Number(post_id)
+            id:post_id
         }
         ,
         data:{
@@ -95,12 +107,12 @@ export const deleteComment =async(req,res)=>{
   const deletedComment=  await prisma.comment.delete({
 
         where:{
-            id:Number(commentId)
+            id:commentId
         }
     });
 
     return res.json({status:200,data:{
-        deleteComment
+        deletedComment
     },msg:"This comment has been deleted now"});
 
 }

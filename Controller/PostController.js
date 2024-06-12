@@ -1,17 +1,44 @@
 import prisma from "../DB/db.config.js";
 
 export const fetchPosts = async (req, res) => {
-    const posts = await prisma.post.findMany({
 
+    let page =Number(req.query.page);
+    let limit =Number(req.query.limit);
+    if(page<=0)
+        page=1;
+    if(limit<=0 || limit>100)
+        limit=10;
+
+    const skip = (page-1)*limit;
+    const posts = await prisma.post.findMany({
+        skip:skip,
+        take:limit,
         include:{
-            comment:true
-        }
+            comment:{
+                include:{
+                    user:{
+                        select:{
+                            name:true,
+                        }
+                    }
+                }
+            }
+
+        } 
     });
+    const totalPosts = await prisma.post.count();
+    const totalPages = Math.ceil(totalPosts/limit);
     
     return res.json({
         status: 200,
         data: posts,
-        msg: "All posts lists"
+        msg: "posts lists",
+        meta:{
+            totalPages,
+            currentPage:page,
+            limit
+            
+        }
     });
 }
 
@@ -21,9 +48,20 @@ export const showPost =async (req,res)=>
         const postId=req.params.id;
         const post =await prisma.post.findFirst({
            where:{
-            id:Number(post)
+            id:Number(postId)
 
-           } 
+           } ,
+           include:{
+            comment:{
+                include:{
+                    user:{
+                        select:{
+                            name:true
+                        }
+                    }
+                }
+            }
+           }
         });
 
         return res.json({status:200, data:{
